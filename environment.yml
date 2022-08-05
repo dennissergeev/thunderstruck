@@ -1,0 +1,29 @@
+name: thunderstruck 
+channels:
+- conda-forge
+dependencies:
+- aeolus
+- cartopy
+- cmcrameri
+- cmocean
+- dask
+- ffmpeg
+- flake8
+- ipykernel
+- ipywidgets
+- iris>=3.2
+- latlon23
+- loguru
+- matplotlib>=3.5
+- metpy>=1.0
+- nc-time-axis
+- netCDF4
+- numpy
+- pandas
+- python>=3.10
+- pip
+- python-stratify
+- tqdm
+- xarray
+- pip:
+  - imageio_ffmpeg
