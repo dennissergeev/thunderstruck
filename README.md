@@ -2,7 +2,7 @@
 :cloud_with_lightning_and_rain: thunderstruck :cloud_with_lightning_and_rain:
 </h1>
 <h4 align="center">
-Summer project 2022
+ Summer project 2022
 </h4>
 
 <p align="center">
