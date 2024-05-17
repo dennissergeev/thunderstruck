@@ -1,4 +1,4 @@
-name: thunderstruck 
+name: thunderstruck
 channels:
 - conda-forge
 dependencies:
@@ -8,7 +8,7 @@ dependencies:
 - cmocean
 - dask
 - ffmpeg
-- flake8
+- imageio-ffmpeg
 - ipykernel
 - ipywidgets
 - iris>=3.2
@@ -17,13 +17,10 @@ dependencies:
 - matplotlib>=3.5
 - metpy>=1.0
 - nc-time-axis
-- netCDF4
 - numpy
 - pandas
-- python>=3.10
+- python>=3.12
 - pip
 - python-stratify
 - tqdm
 - xarray
-- pip:
-  - imageio_ffmpeg

@@ -1,7 +1,7 @@
 # Project-specific
+src/data
 dask-worker-space
 logs/
-review/
 
 # Compiled files
 *.py[cod]
