@@ -7,6 +7,7 @@ from aeolus.subset import DimConstr
 import matplotlib.pyplot as plt
 
 LOWRES = "n96"
+HIGHRES = "n1280"
 
 DC = DimConstr(model=um)
 
@@ -66,7 +67,7 @@ class Simulation:
     lowres_spinup_suite: str
     timestep: int = 240
     lightning_parameterisation: str = "mccaul"
-    resolution: str = "n1280"
+    resolution: str = HIGHRES
     kw_plt: dict = field(default_factory=dict)
 
 
@@ -74,7 +75,7 @@ SIMULATIONS = {
     "hab1": Simulation(
         group="comp",
         title="THAI Hab 1",
-        highres_diag_suite="",
+        highres_diag_suite="dg272",
         highres_spinup_suite="ct229",
         lowres_spinup_suite="co730",
         kw_plt={"color": "C7", "marker": "o"},
@@ -82,7 +83,7 @@ SIMULATIONS = {
     "hab2": Simulation(
         group="comp",
         title="THAI Hab 2",
-        highres_diag_suite="",
+        highres_diag_suite="dg306",
         highres_spinup_suite="cu096",
         lowres_spinup_suite="cr413",
         kw_plt={"color": "C1", "marker": "^"},
@@ -106,7 +107,7 @@ SIMULATIONS = {
     "hab1_0p25bar": Simulation(
         group="pres",
         title="0.25 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg321",
         highres_spinup_suite="cw021",
         lowres_spinup_suite="cq704",
         kw_plt={"color": "C4", "marker": "p"},
@@ -146,7 +147,7 @@ SIMULATIONS = {
     "hab1_10bar": Simulation(
         group="pres",
         title="10 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg333",
         highres_spinup_suite="cy624",
         lowres_spinup_suite="cq708",
         kw_plt={"color": "C9", "marker": "X"},
