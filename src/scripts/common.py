@@ -53,6 +53,15 @@ GROUPS = {
             "hab1_10bar",
         ),
     ),
+    "surf": Group(
+        title="Surface",
+        simulations=(
+            "hab1_aqua",
+            "hab1_rect_b2",
+            "hab1_rect_b8",
+            "hab1_rect_e4",
+        ),
+    ),
 }
 
 
@@ -91,7 +100,7 @@ SIMULATIONS = {
     "archean_early": Simulation(
         group="comp",
         title="Early Archean",
-        highres_diag_suite="",
+        highres_diag_suite="dg936",
         highres_spinup_suite="cz507",
         lowres_spinup_suite="cr388",
         kw_plt={"color": "C2", "marker": "s"},
@@ -99,7 +108,7 @@ SIMULATIONS = {
     "archean_late": Simulation(
         group="comp",
         title="Late Archean",
-        highres_diag_suite="",
+        highres_diag_suite="dg937",
         highres_spinup_suite="cz508",
         lowres_spinup_suite="cr389",
         kw_plt={"color": "C3", "marker": "P"},
@@ -115,7 +124,7 @@ SIMULATIONS = {
     "hab1_0p5bar": Simulation(
         group="pres",
         title="0.5 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg931",
         highres_spinup_suite="cw375",
         lowres_spinup_suite="cq705",
         kw_plt={"color": "C5", "marker": "D"},
@@ -123,7 +132,7 @@ SIMULATIONS = {
     "hab1_1bar": Simulation(
         group="pres",
         title="1 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg272",
         highres_spinup_suite="ct229",
         lowres_spinup_suite="co730",
         kw_plt={"color": "C7", "marker": "o"},
@@ -131,7 +140,7 @@ SIMULATIONS = {
     "hab1_2bar": Simulation(
         group="pres",
         title="2 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg932",
         highres_spinup_suite="cx886",
         lowres_spinup_suite="cq706",
         kw_plt={"color": "C6", "marker": "*"},
@@ -139,7 +148,7 @@ SIMULATIONS = {
     "hab1_4bar": Simulation(
         group="pres",
         title="4 bar",
-        highres_diag_suite="",
+        highres_diag_suite="dg935",
         highres_spinup_suite="cy127",
         lowres_spinup_suite="cq707",
         kw_plt={"color": "C8", "marker": "h"},
@@ -151,5 +160,37 @@ SIMULATIONS = {
         highres_spinup_suite="cy624",
         lowres_spinup_suite="cq708",
         kw_plt={"color": "C9", "marker": "X"},
+    ),
+    "hab1_aqua": Simulation(
+        group="surf",
+        title="Aquaplanet",
+        highres_diag_suite="dg272",
+        highres_spinup_suite="ct229",
+        lowres_spinup_suite="co730",
+        kw_plt={"color": "C7", "marker": "o"},
+    ),
+    "hab1_rect_b2": Simulation(
+        group="surf",
+        title="B2 continent",
+        highres_diag_suite="",
+        highres_spinup_suite="dg758",
+        lowres_spinup_suite="cr577",
+        kw_plt={"color": "C1", "marker": "."},
+    ),
+    "hab1_rect_b8": Simulation(
+        group="surf",
+        title="B8 continent",
+        highres_diag_suite="",
+        highres_spinup_suite="dg759",
+        lowres_spinup_suite="cr578",
+        kw_plt={"color": "C2", "marker": "+"},
+    ),
+    "hab1_rect_e4": Simulation(
+        group="surf",
+        title="E4 continent",
+        highres_diag_suite="",
+        highres_spinup_suite="dg760",
+        lowres_spinup_suite="cr579",
+        kw_plt={"color": "C3", "marker": "x"},
     ),
 }
