@@ -8,11 +8,18 @@ import matplotlib.pyplot as plt
 
 LOWRES = "n96"
 HIGHRES = "n1280"
+PR92 = "PR92 (Convection)"
+M09 = "M09 (Microphysics)"
 
 DC = DimConstr(model=um)
 
 DAYSIDE = Region(-90, 90, -90, 90, name="dayside", model=um)
 NIGHTSIDE = Region(90, -90, -90, 90, name="nightside", model=um)
+
+# Rectangular continents (Lewis+18)
+B2_CONT = Region(-36.25, 36.25, -19, 19, name="B2", model=um)
+B8_CONT = Region(-93.75, 93.75, -49, 49, name="B8", model=um)
+E4_CONT = Region(1.25, 113.75, -29, 29, name="E4", model=um)
 
 KW_ZERO_LINE = {
     "color": plt.rcParams["axes.edgecolor"],
@@ -73,10 +80,13 @@ class Simulation:
     title: str
     highres_diag_suite: str
     highres_spinup_suite: str
+    lowres_diag_suite: str
     lowres_spinup_suite: str
     timestep: int = 240
-    lightning_parameterisation: str = "mccaul"
-    resolution: str = HIGHRES
+    # lightning_parameterisation: str = "mccaul"
+    continent: Region = None
+    resolution_high: str = HIGHRES
+    resolution_low: str = LOWRES
     kw_plt: dict = field(default_factory=dict)
 
 
@@ -187,6 +197,7 @@ SIMULATIONS = {
         highres_spinup_suite="dg758",
         lowres_diag_suite="do274",
         lowres_spinup_suite="cr577",
+        continent=B2_CONT,
         kw_plt={"color": "C1", "marker": "D"},
     ),
     "hab1_rect_b8": Simulation(
@@ -196,6 +207,7 @@ SIMULATIONS = {
         highres_spinup_suite="dg759",
         lowres_diag_suite="do275",
         lowres_spinup_suite="cr578",
+        continent=B8_CONT,
         kw_plt={"color": "C2", "marker": "P"},
     ),
     "hab1_rect_e4": Simulation(
@@ -205,6 +217,7 @@ SIMULATIONS = {
         highres_spinup_suite="dg760",
         lowres_diag_suite="do276",
         lowres_spinup_suite="cr579",
+        continent=E4_CONT,
         kw_plt={"color": "C3", "marker": "X"},
     ),
 }
