@@ -1,15 +1,118 @@
 """Common objects stretched_mesh_proj."""
 from dataclasses import dataclass, field
 
+from aeolus.coord import area_weights_cube
+from aeolus.meta import update_metadata
 from aeolus.model import um
 from aeolus.region import Region
 from aeolus.subset import DimConstr
+import iris
+from iris.coord_systems import GeogCS
+import matplotlib.colors as mcol
 import matplotlib.pyplot as plt
 
 LOWRES = "n96"
 HIGHRES = "n1280"
-PR92 = "PR92 (Convection)"
-M09 = "M09 (Microphysics)"
+ACCUM_PERIOD = iris.cube.Cube(3600 * 24, units="s")  # 1 day
+CMAP_SIM6 = mcol.LinearSegmentedColormap.from_list(
+    "", ["#519fd3", "#286886", "#190c09", "#7d341e", "#be6f63", "#ffadad"]
+)
+# ",".join([f'"{mcol.to_hex(cmap(i))}"' for i in range(cmap.N)])
+# cmap = cmcrameri.cm.managua_r.resampled(6)
+
+
+@dataclass
+class LightParamConfig:
+    """Experiment configuration for different lightning schemes."""
+
+    title: str
+    short_title: str
+    ref: str
+    model_res: str
+    time_ave: str
+    suites: str
+    file_mask: str = "*"
+    kw_plt: dict = field(default_factory=dict)
+
+
+M09 = LightParamConfig(
+    title="M09 (Microphysics)",
+    short_title="M09",
+    ref="McCaul et al. (2009)",
+    model_res=HIGHRES,
+    suites="hr",
+    time_ave="10-day mean",
+    file_mask="umglaa.p*000000*",
+)
+PR92 = LightParamConfig(
+    title="PR92 (Convection)",
+    short_title="PR92",
+    ref="Price & Rind (1992)",
+    model_res=LOWRES,
+    suites="lr",
+    time_ave="30-day mean",
+    file_mask="umglaa.pe000000*",
+)
+
+LPC = {"m09": M09, "pr92": PR92}
+
+
+def callback_coord_system(cube, field, filename, const, model=um):
+    """Attach a Coordinate System to the cube coordinates."""
+    coord_system = GeogCS(semi_major_axis=const.radius.data)
+    for coord_name in [model.x, model.y]:
+        cube.coord(coord_name).coord_system = coord_system
+
+
+@update_metadata(name="flash_rate", units="km-2 yr-1")
+def calc_flash_rate(cubelist, accum_period):
+    """Convert number of lightning flashes to flash rate (per km2 per year)."""
+    num_fl = cubelist.extract_cube(
+        iris.Constraint(
+            name="Number_of_lightning_flashes",
+            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
+        )
+    )
+
+    fl_pa_pyr = num_fl / area_weights_cube(num_fl) / accum_period
+    fl_pa_pyr.coord(um.x).bounds = None
+    fl_pa_pyr.coord(um.y).bounds = None
+    return fl_pa_pyr
+
+
+@update_metadata(name="total_flash_rate", units="s-1")
+def calc_total_flash_rate(cubelist, accum_period):
+    """Convert number of lightning flashes to flash rate (per km2 per year)."""
+    num_fl = cubelist.extract_cube(
+        iris.Constraint(
+            name="Number_of_lightning_flashes",
+            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
+        )
+    )
+    num_fl_tot = num_fl / accum_period
+    # num_fl_tot = spatial(num_fl_tot, "mean")
+    num_fl_tot = num_fl_tot.collapsed([um.x, um.y], iris.analysis.SUM)
+
+    return num_fl_tot
+
+
+@update_metadata(name="convective_cloud_depth", units="m")
+def calc_cloud_depth(cubelist):
+    """Calculate convective cloud depth from 2-224 and 2-225."""
+    cld_base_h = cubelist.extract_cube("m01s05i224")
+    cld_base_h.units = "kft"
+    cld_top_h = cubelist.extract_cube("m01s05i225")
+    cld_top_h.units = "kft"
+    cld_dep = cld_top_h - cld_base_h
+    return cld_dep
+
+
+@update_metadata(name="cloud_to_ground_flash_rate_ratio", units="1")
+def extract_lfr_ratio(cubelist):
+    """Extract lightning flash ratio and update its metadata."""
+    cube = cubelist.extract_cube("m01s21i099")
+    return cube
+
 
 DC = DimConstr(model=um)
 
@@ -78,10 +181,8 @@ class Simulation:
 
     group: str
     title: str
-    highres_diag_suite: str
-    highres_spinup_suite: str
-    lowres_diag_suite: str
-    lowres_spinup_suite: str
+    diag_suites: dict = field(default_factory=dict)
+    spinup_suites: dict = field(default_factory=dict)
     timestep: int = 240
     # lightning_parameterisation: str = "mccaul"
     continent: Region = None
@@ -94,129 +195,101 @@ SIMULATIONS = {
     "hab1": Simulation(
         group="comp",
         title="THAI Hab 1",
-        highres_diag_suite="dg272",
-        highres_spinup_suite="ct229",
-        lowres_diag_suite="do191",
-        lowres_spinup_suite="co730",
+        diag_suites={"hr": "dg272", "lr": "do191"},
+        spinup_suites={"hr": "ct229", "lr": "co730"},
         kw_plt={"color": "C7", "marker": "o"},
     ),
     "hab2": Simulation(
         group="comp",
         title="THAI Hab 2",
-        highres_diag_suite="dg306",
-        highres_spinup_suite="cu096",
-        lowres_diag_suite="do262",
-        lowres_spinup_suite="cr413",
-        kw_plt={"color": "C1", "marker": "^"},
+        diag_suites={"hr": "dg306", "lr": "do262"},
+        spinup_suites={"hr": "cu096", "lr": "cr413"},
+        kw_plt={"color": "C5", "marker": "^"},
     ),
     "archean_early": Simulation(
         group="comp",
         title="Early Archean",
-        highres_diag_suite="dg936",
-        highres_spinup_suite="cz507",
-        lowres_diag_suite="do263",
-        lowres_spinup_suite="cr388",
-        kw_plt={"color": "C2", "marker": "s"},
+        diag_suites={"hr": "dg936", "lr": "do263"},
+        spinup_suites={"hr": "cz507", "lr": "cr388"},
+        kw_plt={"color": "C6", "marker": "p"},
     ),
     "archean_late": Simulation(
         group="comp",
         title="Late Archean",
-        highres_diag_suite="dg937",
-        highres_spinup_suite="cz508",
-        lowres_diag_suite="do264",
-        lowres_spinup_suite="cr389",
-        kw_plt={"color": "C3", "marker": "P"},
+        diag_suites={"hr": "dg937", "lr": "do264"},
+        spinup_suites={"hr": "cz508", "lr": "cr389"},
+        kw_plt={"color": "C8", "marker": "P"},
     ),
     "hab1_0p25bar": Simulation(
         group="pres",
         title="0.25 bar",
-        highres_diag_suite="dg321",
-        highres_spinup_suite="cw021",
-        lowres_diag_suite="do255",
-        lowres_spinup_suite="cq704",
-        kw_plt={"color": "C4", "marker": "p"},
+        diag_suites={"hr": "dg321", "lr": "do255"},
+        spinup_suites={"hr": "cw021", "lr": "cq704"},
+        kw_plt={"color": "#519fd3", "marker": "s"},
     ),
     "hab1_0p5bar": Simulation(
         group="pres",
         title="0.5 bar",
-        highres_diag_suite="dg931",
-        highres_spinup_suite="cw375",
-        lowres_diag_suite="do257",
-        lowres_spinup_suite="cq705",
-        kw_plt={"color": "C5", "marker": "D"},
+        diag_suites={"hr": "dg931", "lr": "do257"},
+        spinup_suites={"hr": "cw375", "lr": "cq705"},
+        kw_plt={"color": "#286886", "marker": "X"},
     ),
     "hab1_1bar": Simulation(  # Deliberate duplicate
         group="pres",
         title="1 bar",
-        highres_diag_suite="dg272",
-        highres_spinup_suite="ct229",
-        lowres_diag_suite="do191",
-        lowres_spinup_suite="co730",
-        kw_plt={"color": "C7", "marker": "o"},
+        diag_suites={"hr": "dg272", "lr": "do191"},
+        spinup_suites={"hr": "ct229", "lr": "co730"},
+        kw_plt={"color": "#190c09", "marker": "o"},
     ),
     "hab1_2bar": Simulation(
         group="pres",
         title="2 bar",
-        highres_diag_suite="dg932",
-        highres_spinup_suite="cx886",
-        lowres_diag_suite="do258",
-        lowres_spinup_suite="cq706",
-        kw_plt={"color": "C6", "marker": "*"},
+        diag_suites={"hr": "dg932", "lr": "do258"},
+        spinup_suites={"hr": "cx886", "lr": "cq706"},
+        kw_plt={"color": "#7d341e", "marker": "^"},
     ),
     "hab1_4bar": Simulation(
         group="pres",
         title="4 bar",
-        highres_diag_suite="dg935",
-        highres_spinup_suite="cy127",
-        lowres_diag_suite="do259",
-        lowres_spinup_suite="cq707",
-        kw_plt={"color": "C8", "marker": "h"},
+        diag_suites={"hr": "dg935", "lr": "do259"},
+        spinup_suites={"hr": "cy127", "lr": "cq707"},
+        kw_plt={"color": "#be6f63", "marker": "h"},
     ),
     "hab1_10bar": Simulation(
         group="pres",
         title="10 bar",
-        highres_diag_suite="dg333",
-        highres_spinup_suite="cy624",
-        lowres_diag_suite="do260",
-        lowres_spinup_suite="cq708",
-        kw_plt={"color": "C9", "marker": "X"},
+        diag_suites={"hr": "dg333", "lr": "do260"},
+        spinup_suites={"hr": "cy624", "lr": "cq708"},
+        kw_plt={"color": "#ffadad", "marker": "X"},
     ),
     "hab1_aqua": Simulation(  # Deliberate duplicate
         group="surf",
         title="Aquaplanet",
-        highres_diag_suite="dg272",
-        highres_spinup_suite="ct229",
-        lowres_diag_suite="do191",
-        lowres_spinup_suite="co730",
+        diag_suites={"hr": "dg272", "lr": "do191"},
+        spinup_suites={"hr": "ct229", "lr": "co730"},
         kw_plt={"color": "C7", "marker": "o"},
     ),
     "hab1_rect_b2": Simulation(
         group="surf",
         title="B2 continent",
-        highres_diag_suite="di560",
-        highres_spinup_suite="dg758",
-        lowres_diag_suite="do274",
-        lowres_spinup_suite="cr577",
+        diag_suites={"hr": "di560", "lr": "do274"},
+        spinup_suites={"hr": "dg758", "lr": "cr577"},
         continent=B2_CONT,
         kw_plt={"color": "C1", "marker": "D"},
     ),
     "hab1_rect_b8": Simulation(
         group="surf",
         title="B8 continent",
-        highres_diag_suite="di561",
-        highres_spinup_suite="dg759",
-        lowres_diag_suite="do275",
-        lowres_spinup_suite="cr578",
+        diag_suites={"hr": "di561", "lr": "do275"},
+        spinup_suites={"hr": "dg759", "lr": "cr578"},
         continent=B8_CONT,
         kw_plt={"color": "C2", "marker": "P"},
     ),
     "hab1_rect_e4": Simulation(
         group="surf",
         title="E4 continent",
-        highres_diag_suite="di562",
-        highres_spinup_suite="dg760",
-        lowres_diag_suite="do276",
-        lowres_spinup_suite="cr579",
+        diag_suites={"hr": "di562", "lr": "do276"},
+        spinup_suites={"hr": "dg760", "lr": "cr579"},
         continent=E4_CONT,
         kw_plt={"color": "C3", "marker": "X"},
     ),
