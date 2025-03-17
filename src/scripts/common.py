@@ -36,22 +36,22 @@ class LightParamConfig:
 
 
 M09 = LightParamConfig(
-    title="M09 (Microphysics)",
+    title="M09 (Microphysics-based)",
     short_title="M09",
     ref="McCaul et al. (2009)",
     model_res=HIGHRES,
     suites="hr",
     time_ave="10-day mean",
-    file_mask="umglaa.p*000000*",
+    file_mask="umglaa.p*00000*",
 )
 PR92 = LightParamConfig(
-    title="PR92 (Convection)",
+    title="PR92 (Convection-based)",
     short_title="PR92",
     ref="Price & Rind (1992)",
     model_res=LOWRES,
     suites="lr",
     time_ave="30-day mean",
-    file_mask="umglaa.pe000000*",
+    file_mask="umglaa.pe00000*",
 )
 
 LPC = {"m09": M09, "pr92": PR92}
@@ -260,7 +260,7 @@ SIMULATIONS = {
         title="10 bar",
         diag_suites={"hr": "dg333", "lr": "do260"},
         spinup_suites={"hr": "cy624", "lr": "cq708"},
-        kw_plt={"color": "#ffadad", "marker": "X"},
+        kw_plt={"color": "#ffadad", "marker": "P"},
     ),
     "hab1_aqua": Simulation(  # Deliberate duplicate
         group="surf",
