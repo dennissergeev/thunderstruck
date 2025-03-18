@@ -1,14 +1,16 @@
 """Common objects stretched_mesh_proj."""
 from dataclasses import dataclass, field
 
+from aeolus.calc import time_mean
 from aeolus.coord import area_weights_cube
 from aeolus.meta import update_metadata
 from aeolus.model import um
 from aeolus.region import Region
-from aeolus.subset import DimConstr
+from aeolus.subset import DimConstr, extract_last_n_days
 import iris
 from iris.coord_systems import GeogCS
 import matplotlib.colors as mcol
+import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 
 LOWRES = "n96"
@@ -29,7 +31,8 @@ class LightParamConfig:
     short_title: str
     ref: str
     model_res: str
-    time_ave: str
+    time_ave_label: str
+    time_ave_func: callable
     suites: str
     file_mask: str = "*"
     kw_plt: dict = field(default_factory=dict)
@@ -41,7 +44,8 @@ M09 = LightParamConfig(
     ref="McCaul et al. (2009)",
     model_res=HIGHRES,
     suites="hr",
-    time_ave="10-day mean",
+    time_ave_label="5-day mean",
+    time_ave_func=lambda cube: time_mean(extract_last_n_days(cube, days=5)),
     file_mask="umglaa.p*00000*",
 )
 PR92 = LightParamConfig(
@@ -50,7 +54,8 @@ PR92 = LightParamConfig(
     ref="Price & Rind (1992)",
     model_res=LOWRES,
     suites="lr",
-    time_ave="30-day mean",
+    time_ave_label="30-day mean",
+    time_ave_func=lambda cube: time_mean(extract_last_n_days(cube, days=30)),
     file_mask="umglaa.pe00000*",
 )
 
@@ -124,7 +129,15 @@ B2_CONT = Region(-36.25, 36.25, -19, 19, name="B2", model=um)
 B8_CONT = Region(-93.75, 93.75, -49, 49, name="B8", model=um)
 E4_CONT = Region(1.25, 113.75, -29, 29, name="E4", model=um)
 
-KW_ZERO_LINE = {
+KW_TEXT = {
+    "ha": "left",
+    "weight": "bold",
+    "size": "large",
+    "rotation": 15,
+    "path_effects": [path_effects.Stroke(linewidth=0.25, foreground="w")],
+    "clip_on": False,
+}
+KW_DELIM_LINE = {
     "color": plt.rcParams["axes.edgecolor"],
     "linewidth": plt.rcParams["axes.linewidth"],
     "linestyle": "dashed",
