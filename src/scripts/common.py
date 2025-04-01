@@ -13,6 +13,7 @@ import matplotlib.colors as mcol
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 
+PROJECT = "thunderstruck"
 LOWRES = "n96"
 HIGHRES = "n1280"
 ACCUM_PERIOD = iris.cube.Cube(3600 * 24, units="s")  # 1 day
