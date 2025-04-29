@@ -1,21 +1,24 @@
 """Common objects stretched_mesh_proj."""
 from dataclasses import dataclass, field
+import warnings
 
 from aeolus.calc import time_mean
 from aeolus.coord import area_weights_cube
 from aeolus.meta import update_metadata
 from aeolus.model import um
 from aeolus.region import Region
-from aeolus.subset import DimConstr, extract_last_n_days
+from aeolus.subset import extract_last_n_days
 import iris
 from iris.coord_systems import GeogCS
 import matplotlib.colors as mcol
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 
+warnings.filterwarnings("ignore")
+
 PROJECT = "thunderstruck"
-LOWRES = "n96"
-HIGHRES = "n1280"
+LOWRES = "N96"
+HIGHRES = "N1280"
 ACCUM_PERIOD = iris.cube.Cube(3600 * 24, units="s")  # 1 day
 CMAP_SIM6 = mcol.LinearSegmentedColormap.from_list(
     "", ["#519fd3", "#286886", "#190c09", "#7d341e", "#be6f63", "#ffadad"]
@@ -23,7 +26,29 @@ CMAP_SIM6 = mcol.LinearSegmentedColormap.from_list(
 # ",".join([f'"{mcol.to_hex(cmap(i))}"' for i in range(cmap.N)])
 # cmap = cmcrameri.cm.managua_r.resampled(6)
 
+KW_TEXT = {
+    "ha": "left",
+    "weight": "bold",
+    "size": "large",
+    "rotation": 15,
+    "path_effects": [path_effects.Stroke(linewidth=0.25, foreground="w")],
+    "clip_on": False,
+}
+KW_DELIM_LINE = {
+    "color": plt.rcParams["axes.edgecolor"],
+    "linewidth": plt.rcParams["axes.linewidth"],
+    "linestyle": "dashed",
+    "dash_capstyle": "round",
+}
+KW_LINE_MARKERS = {
+    "markevery": 0.05,
+    "markersize": 5,
+    "markeredgecolor": plt.rcParams["axes.facecolor"],
+    "markeredgewidth": 0.5,
+}
 
+
+# Two groups of experiments with different lightning schemes
 @dataclass
 class LightParamConfig:
     """Experiment configuration for different lightning schemes."""
@@ -60,98 +85,10 @@ PR92 = LightParamConfig(
     file_mask="umglaa.pe00000*",
 )
 
-LPC = {"m09": M09, "pr92": PR92}
+LPC = {"m09": M09, "pr92": PR92}  # store both of them in one dictionary
 
 
-def callback_coord_system(cube, field, filename, const, model=um):
-    """Attach a Coordinate System to the cube coordinates."""
-    coord_system = GeogCS(semi_major_axis=const.radius.data)
-    for coord_name in [model.x, model.y]:
-        cube.coord(coord_name).coord_system = coord_system
-
-
-@update_metadata(name="flash_rate", units="km-2 yr-1")
-def calc_flash_rate(cubelist, accum_period):
-    """Convert number of lightning flashes to flash rate (per km2 per year)."""
-    num_fl = cubelist.extract_cube(
-        iris.Constraint(
-            name="Number_of_lightning_flashes",
-            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
-        )
-    )
-
-    fl_pa_pyr = num_fl / area_weights_cube(num_fl) / accum_period
-    fl_pa_pyr.coord(um.x).bounds = None
-    fl_pa_pyr.coord(um.y).bounds = None
-    return fl_pa_pyr
-
-
-@update_metadata(name="total_flash_rate", units="s-1")
-def calc_total_flash_rate(cubelist, accum_period):
-    """Convert number of lightning flashes to flash rate (per km2 per year)."""
-    num_fl = cubelist.extract_cube(
-        iris.Constraint(
-            name="Number_of_lightning_flashes",
-            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
-        )
-    )
-    num_fl_tot = num_fl / accum_period
-    # num_fl_tot = spatial(num_fl_tot, "mean")
-    num_fl_tot = num_fl_tot.collapsed([um.x, um.y], iris.analysis.SUM)
-
-    return num_fl_tot
-
-
-@update_metadata(name="convective_cloud_depth", units="m")
-def calc_cloud_depth(cubelist):
-    """Calculate convective cloud depth from 2-224 and 2-225."""
-    cld_base_h = cubelist.extract_cube("m01s05i224")
-    cld_base_h.units = "kft"
-    cld_top_h = cubelist.extract_cube("m01s05i225")
-    cld_top_h.units = "kft"
-    cld_dep = cld_top_h - cld_base_h
-    return cld_dep
-
-
-@update_metadata(name="cloud_to_ground_flash_rate_ratio", units="1")
-def extract_lfr_ratio(cubelist):
-    """Extract lightning flash ratio and update its metadata."""
-    cube = cubelist.extract_cube("m01s21i099")
-    return cube
-
-
-DC = DimConstr(model=um)
-
-DAYSIDE = Region(-90, 90, -90, 90, name="dayside", model=um)
-NIGHTSIDE = Region(90, -90, -90, 90, name="nightside", model=um)
-
-# Rectangular continents (Lewis+18)
-B2_CONT = Region(-36.25, 36.25, -19, 19, name="B2", model=um)
-B8_CONT = Region(-93.75, 93.75, -49, 49, name="B8", model=um)
-E4_CONT = Region(1.25, 113.75, -29, 29, name="E4", model=um)
-
-KW_TEXT = {
-    "ha": "left",
-    "weight": "bold",
-    "size": "large",
-    "rotation": 15,
-    "path_effects": [path_effects.Stroke(linewidth=0.25, foreground="w")],
-    "clip_on": False,
-}
-KW_DELIM_LINE = {
-    "color": plt.rcParams["axes.edgecolor"],
-    "linewidth": plt.rcParams["axes.linewidth"],
-    "linestyle": "dashed",
-    "dash_capstyle": "round",
-}
-KW_LINE_MARKERS = {
-    "markevery": 0.05,
-    "markersize": 5,
-    "markeredgecolor": plt.rcParams["axes.facecolor"],
-    "markeredgewidth": 0.5,
-}
-
-
+# Containers for simulation groups
 @dataclass
 class Group:
     """Details for a group of simulations."""
@@ -188,7 +125,17 @@ GROUPS = {
     ),
 }
 
+# Geographical region objects
+# Hemispheres
+DAYSIDE = Region(-90, 90, -90, 90, name="dayside", model=um)
+NIGHTSIDE = Region(90, -90, -90, 90, name="nightside", model=um)
+# Rectangular continents (Lewis+18)
+B2_CONT = Region(-36.25, 36.25, -19, 19, name="B2", model=um)
+B8_CONT = Region(-93.75, 93.75, -49, 49, name="B8", model=um)
+E4_CONT = Region(1.25, 113.75, -29, 29, name="E4", model=um)
 
+
+# Individual simulations and their corresponding Rose suites
 @dataclass
 class Simulation:
     """UM simulation details."""
@@ -308,3 +255,69 @@ SIMULATIONS = {
         kw_plt={"color": "C3", "marker": "X"},
     ),
 }
+
+
+# Project-specific functions
+def callback_coord_system(cube, field, filename, const, model=um):
+    """Attach a Coordinate System to the cube coordinates."""
+    coord_system = GeogCS(semi_major_axis=const.radius.data)
+    for coord_name in [model.x, model.y]:
+        cube.coord(coord_name).coord_system = coord_system
+
+
+@update_metadata(name="flash_rate", units="km-2 yr-1")
+def calc_flash_rate(cubelist, accum_period):
+    """Convert number of lightning flashes to flash rate (per km2 per year)."""
+    num_fl = cubelist.extract_cube(
+        iris.Constraint(
+            name="Number_of_lightning_flashes",
+            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
+        )
+    )
+
+    fl_pa_pyr = num_fl / area_weights_cube(num_fl) / accum_period
+    fl_pa_pyr.coord(um.x).bounds = None
+    fl_pa_pyr.coord(um.y).bounds = None
+    return fl_pa_pyr
+
+
+@update_metadata(name="total_flash_rate", units="s-1")
+def calc_total_flash_rate(cubelist, accum_period):
+    """Convert number of lightning flashes to flash rate (per km2 per year)."""
+    num_fl = cubelist.extract_cube(
+        iris.Constraint(
+            name="Number_of_lightning_flashes",
+            cube_func=lambda cube: cube.shape[-2:] != (1, 1),
+        )
+    )
+    num_fl_tot = num_fl / accum_period
+    # num_fl_tot = spatial(num_fl_tot, "mean")
+    num_fl_tot = num_fl_tot.collapsed([um.x, um.y], iris.analysis.SUM)
+
+    return num_fl_tot
+
+
+@update_metadata(name="convective_cloud_depth", units="m")
+def calc_cloud_depth(cubelist):
+    """Calculate convective cloud depth from 2-224 and 2-225."""
+    cld_base_h = cubelist.extract_cube("m01s05i224").copy()
+    cld_base_h.units = "kft"
+    cld_top_h = cubelist.extract_cube("m01s05i225").copy()
+    cld_top_h.units = "kft"
+    cld_dep = cld_top_h - cld_base_h
+    return cld_dep
+
+
+@update_metadata(name="convective_cloud_top_height", units="m")
+def conv_cloud_top(cubelist):
+    """Convective cloud top height (STASH 2-225)."""
+    cld_top = cubelist.extract_cube("m01s05i225").copy()
+    cld_top.units = "kft"
+    return cld_top
+
+
+@update_metadata(name="cloud_to_ground_flash_rate_ratio", units="1")
+def extract_lfr_ratio(cubelist):
+    """Extract lightning flash ratio and update its metadata."""
+    cube = cubelist.extract_cube("m01s21i099")
+    return cube
