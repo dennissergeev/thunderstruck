@@ -1,14 +1,9 @@
 <h1 align="center">
 :cloud_with_lightning_and_rain: thunderstruck :cloud_with_lightning_and_rain:
 </h1>
-<h4 align="center">
- Summer project 2022
-</h4>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/wip-%20%F0%9F%9A%A7%20under%20construction%20%F0%9F%9A%A7-yellow"
-       alt="wip">
-</p>
+<h2 align="center">
+ Lightning activity on a tidally locked terrestrial exoplanet in storm-resolving simulations for a range of surface pressures
+</h2>
 
 <p align="center">
 <a href="https://arxiv.org/abs/2504.19883">
@@ -24,3 +19,17 @@
 <img src="https://img.shields.io/badge/license-MIT-green.svg"
      alt="License: MIT"></a>
 </p>
+
+<h2 align="center">Repository contents</h2>
+
+* [`src/scripts/`](src/scripts/): Python scripts and Jupyter Notebooks
+* [`src/figures/`](src/figures/): Figures
+
+|  #  | Figure | Notebook |
+|:---:|:-------|:---------|
+|  1  | [Global Diagnostics](src/figures/thunderstruck__pres__num_fl_m09_t_sfc_iwp_caf_gwp_prec__global.pdf) | [Glob-Diags.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Glob-Diags.ipynb) |
+|  2  | [Maps of lightning activity in M09](src/figures/thunderstruck__pres__m09__lfr__maps.pdf) | [Maps.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Maps.ipynb) |
+|  3  | [Maps of cloud ice content](src/figures/thunderstruck__pres__m09__iwp__maps.pdf) | [Maps.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Maps.ipynb) |
+|  4  | [Vertical profiles of temperature and hydrometeors](src/figures/thunderstruck__pres__temp_m_ci_m_cl_m_g__vert_prof.pdf) | [Vertical-Profiles.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Vertical-Profiles.ipynb) |
+|  5  | [Lightning flash rate and convective cloud depths](src/figures/thunderstruck__pres__num_fl_pr92_cld_dep__global.pdf) | [Glob-Diags.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Glob-Diags.ipynb) |
+|  6  | [Maps of lightning activity in PR92](src/figures/thunderstruck__pres__pr92__lfr__maps.pdf) | [Maps.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Maps.ipynb) |
