@@ -63,3 +63,7 @@ distribute-*.tar.gz
 
 # Mac OSX
 .DS_Store
+
+# pixi environments
+.pixi
+*.egg-info
