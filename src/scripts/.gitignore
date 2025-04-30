@@ -1,7 +1,0 @@
-# Nothing should be tracked in this folder...
-*
-
-# Except...
-!*.py
-!*.ipynb
-!.gitignore
