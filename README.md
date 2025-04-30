@@ -36,3 +36,50 @@
 |  4  | [Vertical profiles of temperature and hydrometeors](src/figures/thunderstruck__pres__temp_m_ci_m_cl_m_g__vert_prof.pdf) | [Vertical-Profiles.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Vertical-Profiles.ipynb) |
 |  5  | [Lightning flash rate and convective cloud depths](src/figures/thunderstruck__pres__num_fl_pr92_cld_dep__global.pdf) | [Glob-Diags.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Glob-Diags.ipynb) |
 |  6  | [Maps of lightning activity in PR92](src/figures/thunderstruck__pres__pr92__lfr__maps.pdf) | [Maps.ipynb](https://nbviewer.jupyter.org/github/dennissergeev/thunderstruck/blob/main/src/scripts/Maps.ipynb) |
+
+<h2 align="center">How to run code</h2>
+
+1. Install [pixi](https://pixi.sh)
+2. Download / check out this repository
+3. Navigate to this folder
+4. Run `pixi install --all` to create the Python environment
+5. Open notebooks in jupyter lab: `pixi run jupyter lab`
+6. Enjoy
+
+```
+System
+------------
+       Pixi version: 0.46.0
+           Platform: linux-64
+   Virtual packages: __unix=0=0
+                   : __linux=4.15.0=0
+                   : __glibc=2.27=0
+                   : __archspec=1=skylake_avx512
+          Cache dir: /home/ds591/.cache/rattler/cache
+       Auth storage: /home/ds591/.rattler/credentials.json
+   Config locations: No config files found
+
+Global
+------------
+            Bin dir: /home/ds591/.pixi/bin
+    Environment dir: /home/ds591/.pixi/envs
+       Manifest dir: /home/ds591/.pixi/manifests/pixi-global.toml
+
+Workspace
+------------
+               Name: thunderstruck
+            Version: 0.1
+      Manifest file: /home/ds591/planets/lightning_proj/thunderstruck/pyproject.toml
+       Last updated: 30-04-2025 20:49:39
+
+Environments
+------------
+        Environment: default
+           Features: default
+           Channels: conda-forge
+   Dependency count: 12
+       Dependencies: python, aeolus, cartopy, ipykernel, iris, matplotlib, numpy, pandas, tqdm, mo_pack, cmocean, jupyterlab
+  PyPI Dependencies: thunderstruck
+   Target platforms: linux-64
+              Tasks: check-dependencies
+```
