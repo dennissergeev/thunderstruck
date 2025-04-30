@@ -10,11 +10,14 @@
 <img src="https://img.shields.io/badge/arXiv-2504.19883-red"
      alt="arXiv preprint"></a>
 <a href="https://www.python.org/downloads/">
-<img src="https://img.shields.io/badge/python-3.10-blue.svg"
-     alt="Python 3.12"></a>
+<img src="https://img.shields.io/badge/python-3.13-blue.svg"
+     alt="Python 3.13"></a>
 <a href="https://github.com/psf/black">
 <img src="https://img.shields.io/badge/code%20style-black-000000.svg"
      alt="black"></a>
+<a href="https://pixi.sh">
+<img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json"
+     alt="Pixi badge"></a>
 <a href="LICENSE">
 <img src="https://img.shields.io/badge/license-MIT-green.svg"
      alt="License: MIT"></a>
