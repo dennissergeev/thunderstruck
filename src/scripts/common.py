@@ -1,4 +1,5 @@
 """Common objects stretched_mesh_proj."""
+
 from dataclasses import dataclass, field
 import warnings
 
@@ -144,8 +145,8 @@ class Simulation:
     title: str
     diag_suites: dict = field(default_factory=dict)
     spinup_suites: dict = field(default_factory=dict)
-    timestep: int = 240
-    # lightning_parameterisation: str = "mccaul"
+    timestep_hres: int = 240
+    timestep_lres: int = 1200
     continent: Region = None
     resolution_high: str = HIGHRES
     resolution_low: str = LOWRES
@@ -191,6 +192,7 @@ SIMULATIONS = {
     "hab1_0p5bar": Simulation(
         group="pres",
         title="0.5 bar",
+        timestep_lres=600,
         diag_suites={"hr": "dg931", "lr": "do257"},
         spinup_suites={"hr": "cw375", "lr": "cq705"},
         kw_plt={"color": "#286886", "marker": "X"},
@@ -297,23 +299,27 @@ def calc_total_flash_rate(cubelist, accum_period):
     return num_fl_tot
 
 
-@update_metadata(name="convective_cloud_depth", units="m")
-def calc_cloud_depth(cubelist):
-    """Calculate convective cloud depth from 2-224 and 2-225."""
-    cld_base_h = cubelist.extract_cube("m01s05i224").copy()
-    cld_base_h.units = "kft"
-    cld_top_h = cubelist.extract_cube("m01s05i225").copy()
-    cld_top_h.units = "kft"
-    cld_dep = cld_top_h - cld_base_h
-    return cld_dep
+@update_metadata(name="convective_cloud_bottom_height", units="m")
+def conv_cloud_bottom(cubelist):
+    """Convective cloud bottom height (STASH 5-210)."""
+    cube = cubelist.extract_cube("m01s05i210").copy()
+    cube.units = "kft"
+    return cube
 
 
 @update_metadata(name="convective_cloud_top_height", units="m")
 def conv_cloud_top(cubelist):
-    """Convective cloud top height (STASH 2-225)."""
-    cld_top = cubelist.extract_cube("m01s05i225").copy()
-    cld_top.units = "kft"
-    return cld_top
+    """Convective cloud top height (STASH 5-211)."""
+    cube = cubelist.extract_cube("m01s05i211").copy()
+    cube.units = "kft"
+    return cube
+
+
+@update_metadata(name="convective_cloud_depth", units="m")
+def calc_cloud_depth(cubelist):
+    """Calculate convective cloud depth."""
+    cld_dep = conv_cloud_top(cubelist) - conv_cloud_bottom(cubelist)
+    return cld_dep
 
 
 @update_metadata(name="cloud_to_ground_flash_rate_ratio", units="1")
@@ -321,3 +327,12 @@ def extract_lfr_ratio(cubelist):
     """Extract lightning flash ratio and update its metadata."""
     cube = cubelist.extract_cube("m01s21i099")
     return cube
+
+
+def pres_label_to_value(label):
+    """Convert pressure labels to pressure values."""
+    import re
+
+    # Extract the part between '_' and 'bar'
+    if match := re.search(r"_(\d+p?\d*)bar", label):
+        return float(match.group(1).replace("p", "."))
